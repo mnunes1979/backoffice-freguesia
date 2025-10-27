@@ -28,7 +28,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { token, user: userData } = response.data;
+      
+      // ✅ CORRIGIDO: Aceder response.data.data em vez de response.data
+      console.log('📥 Login response:', response.data);
+      
+      const { token, user: userData } = response.data.data; // ← AQUI está a correção!
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -36,6 +40,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true };
     } catch (error) {
+      console.error('❌ Login error:', error.response?.data || error.message);
       return { 
         success: false, 
         error: error.response?.data?.message || 'Erro ao fazer login' 
