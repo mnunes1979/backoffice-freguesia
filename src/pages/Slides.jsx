@@ -209,7 +209,7 @@ const Slides = () => {
                   value={formData.image}
                   onChange={(url) => setFormData({ ...formData, image: url })}
                   maxSizeMB={2}
-                  required={true}
+                  required={false}
                 />
                 <p className="text-xs text-gray-500 mt-2">
                   💡 Recomendado: 1920x600 pixels • A imagem será comprimida automaticamente
