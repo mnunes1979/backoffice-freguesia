@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Image as ImageIcon, Calendar, Eye } from 'lucide-react';
 import api from '../api';
 import Header from '../components/Header';
+import ImageUpload from '../components/ImageUpload';
 
 const Noticias = () => {
   const [noticias, setNoticias] = useState([]);
@@ -241,28 +242,12 @@ const Noticias = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL da Imagem
-                </label>
-                <input
-                  type="url"
+                <ImageUpload
+                  label="Imagem da Notícia"
                   value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(url) => setFormData({ ...formData, image: url })}
+                  maxSizeMB={1}
                 />
-                {formData.image && (
-                  <div className="mt-2">
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="flex space-x-3 pt-4">
