@@ -1,13 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Loader, Link as LinkIcon, AlertCircle } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 
 const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, required = false }) => {
-  const [mode, setMode] = useState('upload'); // 'upload' ou 'url'
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState(value || null);
-  const [urlInput, setUrlInput] = useState(value || '');
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
@@ -61,7 +59,7 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Endpoint /api/upload não implementado na API');
+        throw new Error(errorData.error || 'Erro ao fazer upload da imagem');
       }
 
       const data = await response.json();
@@ -79,14 +77,7 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
       return imageUrl;
     } catch (error) {
       console.error('Erro no upload:', error);
-      const errorMsg = error.message || 'Erro ao fazer upload da imagem';
-      setError(errorMsg);
-      
-      // Se for erro de endpoint não implementado, sugerir usar URL
-      if (errorMsg.includes('404') || errorMsg.includes('não implementado') || errorMsg.includes('not found')) {
-        setError('⚠️ Endpoint de upload não disponível. Use a opção "URL Direta" abaixo.');
-      }
-      
+      setError(error.message || 'Erro ao fazer upload da imagem');
       throw error;
     } finally {
       setIsUploading(false);
@@ -154,26 +145,8 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
     }
   };
 
-  const handleUrlSubmit = () => {
-    if (!urlInput.trim()) {
-      setError('Por favor insira uma URL');
-      return;
-    }
-
-    // Validação básica de URL
-    try {
-      new URL(urlInput);
-      setPreview(urlInput);
-      onChange(urlInput);
-      setError('');
-    } catch (e) {
-      setError('URL inválida. Deve começar com http:// ou https://');
-    }
-  };
-
   const handleRemove = () => {
     setPreview(null);
-    setUrlInput('');
     onChange('');
     setError('');
     if (fileInputRef.current) {
@@ -191,36 +164,8 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
         {label} {required && <span className="text-red-500">*</span>}
       </label>
 
-      {/* Seletor de Modo */}
-      <div className="flex gap-2 mb-3">
-        <button
-          type="button"
-          onClick={() => setMode('upload')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            mode === 'upload'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          <Upload size={16} className="inline mr-1" />
-          Upload
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('url')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            mode === 'url'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          <LinkIcon size={16} className="inline mr-1" />
-          URL Direta
-        </button>
-      </div>
-
-      {/* Modo Upload */}
-      {mode === 'upload' && !preview && (
+      {/* Area de Upload / Preview */}
+      {!preview ? (
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -242,6 +187,7 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
             accept="image/*"
             onChange={handleFileInputChange}
             className="hidden"
+            required={required && !preview}
           />
 
           {isUploading ? (
@@ -268,46 +214,14 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
             </div>
           )}
         </div>
-      )}
-
-      {/* Modo URL */}
-      {mode === 'url' && !preview && (
-        <div className="space-y-2">
-          <input
-            type="url"
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            placeholder="https://exemplo.com/imagem.jpg"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleUrlSubmit();
-              }
-            }}
-          />
-          <button
-            type="button"
-            onClick={handleUrlSubmit}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Usar esta URL
-          </button>
-          <p className="text-xs text-gray-500">
-            💡 Use esta opção enquanto o endpoint de upload não está implementado na API
-          </p>
-        </div>
-      )}
-
-      {/* Preview da Imagem */}
-      {preview && (
+      ) : (
         <div className="relative">
           <img
             src={preview}
             alt="Preview"
             className="w-full h-64 object-cover rounded-lg border border-gray-200"
             onError={() => {
-              setError('Erro ao carregar preview da imagem. Verifique se a URL é válida.');
+              setError('Erro ao carregar preview da imagem');
             }}
           />
           <button
@@ -332,33 +246,17 @@ const ImageUpload = ({ value, onChange, label = "Imagem", maxSizeMB = 1, require
       {/* Mensagem de Erro */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start">
-          <AlertCircle className="text-red-600 mt-0.5 mr-2 flex-shrink-0" size={16} />
-          <div className="flex-1">
-            <p className="text-sm text-red-800">{error}</p>
-            {error.includes('Endpoint') && (
-              <p className="text-xs text-red-700 mt-1">
-                Clique em "URL Direta" acima para usar links de imagens como solução temporária.
-              </p>
-            )}
-          </div>
+          <X className="text-red-600 mt-0.5 mr-2 flex-shrink-0" size={16} />
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
       {/* Informação sobre compressão */}
-      {preview && !isUploading && !error && mode === 'upload' && (
+      {preview && !isUploading && !error && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start">
           <ImageIcon className="text-green-600 mt-0.5 mr-2 flex-shrink-0" size={16} />
           <p className="text-xs text-green-800 font-medium">
             ✓ Imagem carregada e comprimida com sucesso
-          </p>
-        </div>
-      )}
-
-      {preview && mode === 'url' && !error && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start">
-          <LinkIcon className="text-blue-600 mt-0.5 mr-2 flex-shrink-0" size={16} />
-          <p className="text-xs text-blue-800 font-medium">
-            ✓ URL da imagem definida
           </p>
         </div>
       )}
