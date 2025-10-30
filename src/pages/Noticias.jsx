@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Image as ImageIcon, Calendar, Eye } from 'lucide-react';
-import api from '../api';
+import api from '../utils/api';
 import Header from '../components/Header';
 
 const Noticias = () => {

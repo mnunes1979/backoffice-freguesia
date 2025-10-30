@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
-import api from '../api';
+import api from '../utils/api';
 import Header from '../components/Header';
 
 const Slides = () => {

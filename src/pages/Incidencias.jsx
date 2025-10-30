@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock, MapPin, Calendar, Image as ImageIcon } from 'lucide-react';
-import api from '../api';
+import api from '../utils/api';
 import Header from '../components/Header';
 
 const Incidencias = () => {

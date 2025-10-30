@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Shield, User, Trash2, Mail, Calendar } from 'lucide-react';
-import api from '../api';
+import api from '../utils/api';
 import Header from '../components/Header';
 
 const Usuarios = () => {

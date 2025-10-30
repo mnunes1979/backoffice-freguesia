@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Save, Lock, Bell, Globe, Database } from 'lucide-react';
 import Header from '../components/Header';
-import api from '../api';
 
 const Configuracoes = () => {
   const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [config, setConfig] = useState({
     siteName: 'União de Freguesias',
     siteDescription: 'Portal de transparência e gestão cidadã',
@@ -20,55 +17,13 @@ const Configuracoes = () => {
     requireApproval: true,
   });
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
-
-  const fetchConfig = async () => {
-    try {
-      const response = await api.get('/config');
-      if (response.data) {
-        setConfig(response.data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar configurações:', error);
-      // Se não houver configurações na API, tenta carregar do localStorage
-      const localConfig = localStorage.getItem('siteConfig');
-      if (localConfig) {
-        setConfig(JSON.parse(localConfig));
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    setError('');
-    
-    try {
-      await api.put('/config', config);
-      // Também guarda no localStorage como backup
-      localStorage.setItem('siteConfig', JSON.stringify(config));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
-      console.error('Erro ao guardar configurações:', error);
-      setError('Erro ao guardar configurações. Tente novamente.');
-      // Em caso de erro, guarda apenas no localStorage
-      localStorage.setItem('siteConfig', JSON.stringify(config));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    }
+    // Aqui seria guardado no backend
+    localStorage.setItem('siteConfig', JSON.stringify(config));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -288,12 +243,6 @@ const Configuracoes = () => {
             {saved && (
               <div className="text-green-600 font-medium flex items-center">
                 ✓ Configurações guardadas com sucesso!
-              </div>
-            )}
-
-            {error && (
-              <div className="text-red-600 font-medium flex items-center">
-                ✗ {error}
               </div>
             )}
           </div>
