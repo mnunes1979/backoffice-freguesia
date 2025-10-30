@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import api from '../utils/api';
+import api from '../api';
 
 const AuthContext = createContext();
 
@@ -32,7 +32,9 @@ export const AuthProvider = ({ children }) => {
       // ✅ CORRIGIDO: Aceder response.data.data em vez de response.data
       console.log('📥 Login response:', response.data);
       
-      const { token, user: userData } = response.data.data; // ← AQUI está a correção!
+      const payload = response?.data?.data ?? response?.data;
+      if (!payload?.token || !payload?.user) { throw new Error('Resposta de login inválida'); }
+      const { token, user: userData } = payload;
       
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
