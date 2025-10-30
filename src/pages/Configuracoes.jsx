@@ -45,40 +45,20 @@ const Configuracoes = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     setError('');
-    setSaved(false);
     
     try {
-      // Tentar guardar na API
       await api.put('/config', config);
-      
-      // Se sucesso, também guarda no localStorage como backup
+      // Também guarda no localStorage como backup
       localStorage.setItem('siteConfig', JSON.stringify(config));
-      
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (error) {
-      console.error('Erro ao guardar configurações na API:', error);
-      
-      // Verificar se é erro 404 (endpoint não existe)
-      if (error.response?.status === 404) {
-        // Endpoint não existe, usar apenas localStorage
-        localStorage.setItem('siteConfig', JSON.stringify(config));
-        setSaved(true);
-        setError('⚠️ Configurações guardadas localmente. O endpoint da API (/config) ainda não está implementado.');
-        setTimeout(() => {
-          setSaved(false);
-          setError('');
-        }, 5000);
-      } else {
-        // Outro erro - mostrar erro mas guardar localmente
-        setError(`Erro ao guardar na API: ${error.response?.data?.error || error.message}. Guardado localmente como backup.`);
-        localStorage.setItem('siteConfig', JSON.stringify(config));
-        setSaved(true);
-        setTimeout(() => {
-          setSaved(false);
-          setError('');
-        }, 5000);
-      }
+      console.error('Erro ao guardar configurações:', error);
+      setError('Erro ao guardar configurações. Tente novamente.');
+      // Em caso de erro, guarda apenas no localStorage
+      localStorage.setItem('siteConfig', JSON.stringify(config));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     }
   };
 

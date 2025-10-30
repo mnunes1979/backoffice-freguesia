@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
 import api from '../api';
 import Header from '../components/Header';
-import ImageUpload from '../components/ImageUpload';
 
 const Slides = () => {
   const [slides, setSlides] = useState([]);
@@ -204,16 +203,32 @@ const Slides = () => {
               </div>
 
               <div>
-                <ImageUpload
-                  label="Imagem do Slide"
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  URL da Imagem *
+                </label>
+                <input
+                  type="url"
                   value={formData.image}
-                  onChange={(url) => setFormData({ ...formData, image: url })}
-                  maxSizeMB={2}
-                  required={true}
+                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  💡 Recomendado: 1920x600 pixels • A imagem será comprimida automaticamente
+                <p className="text-xs text-gray-500 mt-1">
+                  Recomendado: 1920x600 pixels
                 </p>
+                {formData.image && (
+                  <div className="mt-2">
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
